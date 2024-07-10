@@ -1,0 +1,233 @@
+VD Detection.m:
+----------------------------------------------------------------------------------
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @VD_Detection_OpeningFcn, ...
+                   'gui_OutputFcn',  @VD_Detection_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin && ischar(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+% --- Executes just before VD_Detection is made visible.
+function VD_Detection_OpeningFcn(hObject, eventdata, handles, varargin)
+% This function has no output args, see OutputFcn.
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to VD_Detection (see VARARGIN)
+
+% Choose default command line output for VD_Detection
+handles.output = hObject;
+axes(handles.axes1); axis off
+axes(handles.axes2); axis off
+set(handles.edit1,'String','**');
+% Update handles structure
+guidata(hObject, handles);
+
+% UIWAIT makes VD_Detection wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = VD_Detection_OutputFcn(hObject, eventdata, handles) 
+% varargout  cell array for returning output args (see VARARGOUT);
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get default command line output from handles structure
+varargout{1} = handles.output;
+
+
+% --- Executes on button press in pushbutton1.
+function pushbutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+count=1;
+locate_points=65;
+% w = webcam(1);
+for c = 1:count
+    url = 'http://192.168.210.195/cam-lo.jpg';
+img=imread(url);
+    axes(handles.axes1); imshow(img) % display the image
+    title('Input Info','fontsize',12,'fontname','Times New Roman','color','Black')
+    f1=il_rgb2gray(double(img));
+  [ysize,xsize]=size(f1);
+  nptsmax=locate_points;   
+  kparam=0.04;  
+  pointtype=1;  
+  sxl2=4;       
+  sxi2=2*sxl2;  
+  [posinit,valinit]=STIP(f1,kparam,sxl2,sxi2,pointtype,nptsmax);
+  Test_Feat(c,1:locate_points)=valinit;
+   axes(handles.axes2); imshow(f1,[]), hold on
+ axis off;
+ showellipticfeatures(posinit,[1 1 0]);
+ title('Segmented Info with Points','fontsize',12,'fontname','Times New Roman','color','Black')
+ posinit=mean(posinit)
+ set(handles.edit1,'String','+++++');
+end
+
+% --- Executes on button press in pushbutton2.
+function pushbutton2_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+count=80;
+locate_points=65;
+% w = webcam(1);
+for c = 1:count
+        url = 'http://192.168.210.195/cam-lo.jpg';
+img=imread(url);
+imwrite(img,'23.png')
+    axes(handles.axes1);imshow(img) % display the image
+       title('Input Info','fontsize',12,'fontname','Times New Roman','color','Black')
+    f1=il_rgb2gray(double(img));
+  [ysize,xsize]=size(f1);
+  nptsmax=locate_points;   
+  kparam=0.04;  
+  pointtype=1;  
+  sxl2=4;       
+  sxi2=2*sxl2;  
+  [posinit,valinit]=STIP(f1,kparam,sxl2,sxi2,pointtype,nptsmax);
+  Test_Feat(c,1:locate_points)=valinit;
+   axes(handles.axes2);imshow(f1,[]), hold on
+ axis off;
+ showellipticfeatures(posinit,[1 1 0]);
+title('Segmented Info with Points','fontsize',12,'fontname','Times New Roman','color','Black')
+ posinit=mean(posinit)
+
+ if((posinit(1)<250 && posinit(1)>200))
+tts('VIOLENCE DETECTED');
+% msgbox('VIOLENCE DETECTED');
+set(handles.edit1,'String','VIOLENCE DETECTED');
+ end
+
+end
+
+% --- Executes on button press in pushbutton3.
+function pushbutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+axes(handles.axes1); cla(handles.axes1); title(''); axis off
+axes(handles.axes2); cla(handles.axes2); title(''); axis off
+ set(handles.edit1,'String','--');
+
+% --- Executes on button press in pushbutton4.
+function pushbutton4_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+close 
+
+
+
+function edit1_Callback(hObject, eventdata, handles)
+% hObject    handle to edit1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit1 as text
+%        str2double(get(hObject,'String')) returns contents of edit1 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+---------------------------------------------------------------------------------------------------
+Initialization:
+
+The code sets up the basic structure for the graphical user interface (GUI), ensuring that only one instance of the GUI is running (gui_Singleton = 1).
+It defines a structure (gui_State) to hold GUI-related information, including its name, whether it's a singleton, and functions to handle opening and output.
+It checks if any input arguments are provided and converts the first argument to a function handle if it's a character array.
+Main Function Call:
+
+The code calls the main function for the GUI (gui_mainfcn) with appropriate arguments, depending on whether there are output arguments or not.
+Opening Function (VD_Detection_OpeningFcn):
+
+This function executes before the GUI becomes visible.
+It sets up default values and initializes the GUI elements.
+It sets the default output for the GUI.
+Output Function (VD_Detection_OutputFcn):
+
+This function defines what should be returned when the GUI is called as a function.
+Button Callbacks:
+
+Callback functions are defined for each push button (pushbutton1, pushbutton2, etc.).
+These functions execute when the respective buttons are pressed.
+Violence Detection Process:
+
+In the pushbutton2_Callback function, the code captures an image from a URL, possibly from a camera feed.
+It converts the image to grayscale and performs feature extraction (STIP function) to locate points of interest.
+It checks the position of these points and if certain conditions are met, it assumes violence is detected and displays a message.
+Cleanup and Reset:
+
+The pushbutton3_Callback function clears displayed images and resets the GUI.
+The pushbutton4_Callback function closes the GUI window.
+Overall, this code sets up a GUI for violence detection from a video feed. It captures frames, extracts features, and checks for violence based on some predefined criteria.
+
+--------------------------------------------------------------------------------------------------------------------------------
+Working:
+
+Setting Up the System:
+
+You have a beach surveillance system powered by an Arduino microcontroller.
+This system includes a camera module and a Passive Infrared (PIR) sensor for detecting motion.
+Graphical User Interface (GUI):
+
+The GUI is like a control panel for your surveillance system.
+It's created using MATLAB, making it easy to interact with the system.
+Running the System:
+
+When you start the system, the GUI initializes.
+You'll see buttons on the GUI, each representing different actions or functions of your surveillance system.
+Capturing Images:
+
+When you click on certain buttons (like pushbutton1 or pushbutton2), the system captures images using the camera module.
+Processing Images:
+
+After capturing an image, the system processes it to detect human activity.
+It uses techniques like feature extraction to find specific points in the image that indicate movement or potential violence.
+Alert Mechanism:
+
+If human activity (possibly violent) is detected, the system triggers a buzzer to sound an alert.
+Additionally, it can send SMS notifications to a designated administrator via a GSM module.
+These notifications include the location of the detected activity, obtained from a GPS module.
+User Interaction:
+
+The GUI provides feedback to the user, displaying captured images and any detected alerts.
+It also allows users to clear displayed images and reset the system.
+Continuous Monitoring:
+
+The system can continuously monitor the beach area, capturing and processing images in real-time.
+This ensures that any potential incidents are quickly detected and appropriate actions are taken.
+Weatherproof Design:
+
+The system is designed to withstand outdoor environments, making it suitable for beach surveillance.
+It's compact and weatherproof, ensuring durability even in varying weather conditions.
+
+
+
+
+
